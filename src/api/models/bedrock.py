@@ -43,6 +43,7 @@ from api.setting import (
     AWS_REGION,
     DEBUG,
     DEFAULT_MODEL,
+    AWS_PROFILE,
     ENABLE_CROSS_REGION_INFERENCE,
     ENABLE_APPLICATION_INFERENCE_PROFILES,
 )
@@ -59,16 +60,30 @@ config = Config(
             max_pool_connections=50  # Maximum connection pool size
         )
 
-bedrock_runtime = boto3.client(
-    service_name="bedrock-runtime",
-    region_name=AWS_REGION,
-    config=config,
-)
-bedrock_client = boto3.client(
-    service_name="bedrock",
-    region_name=AWS_REGION,
-    config=config,
-)
+# Initialize boto3 session with profile if specified
+if AWS_PROFILE:
+    session = boto3.Session(profile_name=AWS_PROFILE)
+    bedrock_runtime = session.client(
+        service_name="bedrock-runtime",
+        region_name=AWS_REGION,
+        config=config,
+    )
+    bedrock_client = session.client(
+        service_name="bedrock",
+        region_name=AWS_REGION,
+        config=config,
+    )
+else:
+    bedrock_runtime = boto3.client(
+        service_name="bedrock-runtime",
+        region_name=AWS_REGION,
+        config=config,
+    )
+    bedrock_client = boto3.client(
+        service_name="bedrock",
+        region_name=AWS_REGION,
+        config=config,
+    )
 
 
 def get_inference_region_prefix():
